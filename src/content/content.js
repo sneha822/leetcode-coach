@@ -134,10 +134,15 @@
   document.addEventListener("keydown", function (e) { if (e.target && e.target.closest && e.target.closest(".monaco-editor")) markActivity(); }, true);
 
   /* ================= OVERLAY ================= */
-  var root = null, panel = null;
+  var root = null, panel = null, panelHost = null;
   function mount() {
     if (root) return;
     root = el("div", { id: "lcc-root" });
+    // The panel repaints often (on polls and editor-status changes). Modals and
+    // toasts are appended directly to `root` as siblings of panelHost, so a
+    // panel repaint never destroys an open dialog (e.g. the plan prompt).
+    panelHost = el("div", { class: "lcc-host" });
+    root.appendChild(panelHost);
     (document.body || document.documentElement).appendChild(root);
     refresh();
   }
@@ -148,11 +153,11 @@
   }
 
   function refresh() {
-    if (!root) return;
-    if (!state.settings.showOverlay) { root.innerHTML = ""; return; }
-    root.innerHTML = "";
+    if (!root || !panelHost) return;
+    if (!state.settings.showOverlay) { panelHost.innerHTML = ""; return; }
+    panelHost.innerHTML = "";
     panel = el("div", { class: "lcc-panel" + (state.active && state.active.slug === slug && state.active.paused ? " lcc-paused" : "") });
-    root.appendChild(panel);
+    panelHost.appendChild(panel);
 
     var mode = state.active ? modeLabel(state.active.mode) : "";
     var header = el("div", { class: "lcc-head" }, [
