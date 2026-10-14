@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="popup.css" />
+  <title>LeetCode Coach</title>
+</head>
+<body>
+  <header class="hd">
+    <span class="logo">◆ LeetCode Coach</span>
+  </header>
+
+  <main id="main">
+    <div id="view" class="view"></div>
+  </main>
+
+  <footer class="ft">
+    <button id="dashBtn" class="btn ghost">Open dashboard</button>
+    <button id="cogBtn" class="icon" title="Settings" aria-label="Settings">⚙</button>
+  </footer>
+
+  <section id="settings" class="settings" hidden>
+    <h3>Settings</h3>
+    <label class="tog"><input type="checkbox" id="setReminders" /> Revision reminders (1·3·7·14 days)</label>
+    <label class="tog"><input type="checkbox" id="setOverlay" /> Show on-page overlay</label>
+    <label class="tog"><input type="checkbox" id="setRawCode" /> Store my code snapshots locally <small>(off = keep only diffs &amp; lengths)</small></label>
+    <p class="fine">All data stays in this browser (chrome.storage.local). Nothing is sent anywhere.</p>
+    <button id="closeSet" class="btn ghost sm">Done</button>
+  </section>
+
+  <script src="../lib/util.js"></script>
+  <script src="../lib/schema.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

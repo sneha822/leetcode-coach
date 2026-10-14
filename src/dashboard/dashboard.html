@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <title>LeetCode Coach — Dashboard</title>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap row">
+      <h1>◆ LeetCode Coach <span class="dim">— Progress</span></h1>
+      <div class="actions">
+        <button id="exCsv" class="btn ghost">Export CSV</button>
+        <button id="exJson" class="btn ghost">Export JSON</button>
+        <button id="reset" class="btn danger">Reset data</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" id="app">
+    <div id="empty" class="empty" hidden>
+      <div class="big">No sessions yet</div>
+      Start a focus session from a LeetCode problem page, and your process analytics will appear here.
+    </div>
+    <div id="content" hidden>
+      <section id="tiles" class="tiles"></section>
+
+      <section class="panel">
+        <h2>Weekly activity <span class="hint">sessions per week, last 8 weeks (green = accepted)</span></h2>
+        <div id="chartWeekly" class="chart"></div>
+      </section>
+
+      <div class="cols">
+        <section class="panel">
+          <h2>Independent vs assisted</h2>
+          <div id="indVsAssist"></div>
+          <p class="fine">Assisted = hints/editorial mode, self-reported external help, or a paste you marked as external.</p>
+        </section>
+        <section class="panel">
+          <h2>Score trend <span class="hint">assessed points per session</span></h2>
+          <div id="chartScore" class="chart"></div>
+        </section>
+      </div>
+
+      <div class="cols">
+        <section class="panel">
+          <h2>Difficulty performance <span class="hint">reliable (from the page)</span></h2>
+          <div id="byDifficulty"></div>
+        </section>
+        <section class="panel">
+          <h2>Debugging patterns</h2>
+          <div id="debugStats"></div>
+        </section>
+      </div>
+
+      <div class="cols">
+        <section class="panel">
+          <h2>Needed hints / editorial</h2>
+          <div id="needHelp"></div>
+        </section>
+        <section class="panel">
+          <h2>Re-attempted problems <span class="hint">solved more than once</span></h2>
+          <div id="repeats"></div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2>Upcoming revisions <span class="hint">spaced at 1 · 3 · 7 · 14 days after each session</span></h2>
+        <div id="revisions"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Session log</h2>
+        <div id="log" class="log"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../lib/util.js"></script>
+  <script src="../lib/schema.js"></script>
+  <script src="../lib/storage.js"></script>
+  <script src="../lib/scoring.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

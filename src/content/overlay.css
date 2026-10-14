@@ -1,0 +1,104 @@
+/* overlay.css — styles for the injected coach UI. All selectors are prefixed
+   .lcc- / #lcc-root and scoped tightly so they don't fight LeetCode's styles.
+   Everything resets box-sizing locally and uses a fixed high z-index. */
+#lcc-root, #lcc-root * { box-sizing: border-box; }
+#lcc-root {
+  --lcc-bg: #1c1b22; --lcc-bg2: #26242e; --lcc-fg: #f1eef7; --lcc-soft: #a9a3b8;
+  --lcc-line: #38343f; --lcc-accent: #8b7bff; --lcc-accent2: #6d5cf0;
+  --lcc-ok: #4ec98a; --lcc-bad: #f0796b; --lcc-wait: #e0b24f; --lcc-warn: #f0796b;
+  position: fixed; z-index: 2147483000; top: 0; left: 0; width: 0; height: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--lcc-fg);
+}
+
+/* ---- panel ---- */
+.lcc-panel {
+  position: fixed; right: 18px; bottom: 18px; width: 232px;
+  background: var(--lcc-bg); border: 1px solid var(--lcc-line); border-radius: 14px;
+  box-shadow: 0 10px 34px -10px rgba(0,0,0,.6); padding: 12px 13px 13px; font-size: 13px;
+}
+.lcc-panel.lcc-paused { outline: 2px solid var(--lcc-wait); outline-offset: -2px; }
+.lcc-head { display: flex; align-items: center; gap: 7px; }
+.lcc-logo { font-weight: 700; letter-spacing: .02em; color: var(--lcc-accent); font-size: 12.5px; }
+.lcc-badge { font-size: 10.5px; padding: 2px 7px; border-radius: 99px; background: var(--lcc-bg2); color: var(--lcc-soft); }
+.lcc-mode-independent { color: #cbbcff; background: #2e2850; }
+.lcc-mode-hints { color: #ffe0a6; background: #413318; }
+.lcc-mode-review { color: #a9d8ff; background: #1c3147; }
+.lcc-min { margin-left: auto; background: transparent; border: none; color: var(--lcc-soft); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; border-radius: 6px; }
+.lcc-min:hover { color: var(--lcc-fg); background: var(--lcc-bg2); }
+
+.lcc-timer { font-size: 30px; font-weight: 700; letter-spacing: .02em; margin: 8px 0 1px; font-variant-numeric: tabular-nums; }
+.lcc-timer.small { font-size: 18px; margin: 4px 0; color: var(--lcc-soft); }
+.lcc-status { font-size: 11.5px; color: var(--lcc-soft); margin-bottom: 9px; }
+.lcc-note { font-size: 12px; color: var(--lcc-soft); margin: 8px 0; line-height: 1.4; }
+
+.lcc-metrics { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.lcc-pill { background: var(--lcc-bg2); border-radius: 8px; padding: 3px 7px; display: inline-flex; gap: 4px; align-items: baseline; }
+.lcc-pill b { font-size: 12.5px; } .lcc-pill i { font-style: normal; font-size: 10px; color: var(--lcc-soft); }
+.lcc-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-left: auto; }
+.lcc-dot.ok { background: var(--lcc-ok); } .lcc-dot.bad { background: var(--lcc-bad); } .lcc-dot.wait { background: var(--lcc-wait); }
+
+.lcc-btns { display: flex; gap: 7px; }
+.lcc-btn {
+  font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; border-radius: 9px;
+  padding: 8px 12px; border: 1px solid var(--lcc-line); background: var(--lcc-bg2); color: var(--lcc-fg); flex: 1;
+}
+.lcc-btn:hover { border-color: var(--lcc-accent); }
+.lcc-btn.lcc-end, .lcc-btn.warn { background: #3a1f1c; border-color: #5a2a24; color: #ffb3a8; }
+.lcc-btn.lcc-start, .lcc-btn.primary { background: var(--lcc-accent2); border-color: var(--lcc-accent2); color: #fff; }
+.lcc-btn.lcc-start:hover, .lcc-btn.primary:hover { filter: brightness(1.08); }
+.lcc-btn.ghost { background: transparent; }
+.lcc-btn.sm { flex: 0 0 auto; padding: 6px 10px; font-size: 11.5px; }
+.lcc-select { width: 100%; font: inherit; font-size: 12.5px; padding: 7px 9px; border-radius: 9px; background: var(--lcc-bg2); color: var(--lcc-fg); border: 1px solid var(--lcc-line); margin-bottom: 8px; }
+
+/* ---- toast ---- */
+.lcc-toast {
+  position: fixed; right: 18px; bottom: 210px; width: 290px; background: var(--lcc-bg);
+  border: 1px solid var(--lcc-wait); border-radius: 12px; padding: 12px; box-shadow: 0 10px 30px -8px rgba(0,0,0,.6);
+}
+.lcc-toast-ttl { font-weight: 700; font-size: 12.5px; color: var(--lcc-wait); margin-bottom: 4px; }
+.lcc-toast-msg { font-size: 11.5px; color: var(--lcc-soft); line-height: 1.45; margin-bottom: 9px; }
+.lcc-toast-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---- modal ---- */
+.lcc-modal-overlay {
+  position: fixed; inset: 0; background: rgba(10,9,14,.6); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; padding: 18px;
+}
+.lcc-modal {
+  width: min(560px, 94vw); max-height: 88vh; overflow: auto; background: var(--lcc-bg);
+  border: 1px solid var(--lcc-line); border-radius: 16px; box-shadow: 0 24px 60px -20px rgba(0,0,0,.7);
+}
+.lcc-modal-head { display: flex; align-items: center; padding: 15px 18px; border-bottom: 1px solid var(--lcc-line); position: sticky; top: 0; background: var(--lcc-bg); }
+.lcc-modal-head h2 { font-size: 16px; margin: 0; font-weight: 700; }
+.lcc-x { margin-left: auto; background: transparent; border: none; color: var(--lcc-soft); font-size: 22px; cursor: pointer; line-height: 1; }
+.lcc-modal-body { padding: 16px 18px; }
+.lcc-modal-foot { padding: 12px 18px 16px; display: flex; gap: 9px; justify-content: flex-end; position: sticky; bottom: 0; background: var(--lcc-bg); border-top: 1px solid var(--lcc-line); }
+.lcc-sub { font-size: 12.5px; color: var(--lcc-soft); margin: 0 0 14px; line-height: 1.5; }
+
+.lcc-field { display: block; margin-bottom: 12px; }
+.lcc-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--lcc-soft); margin-bottom: 5px; font-weight: 600; }
+.lcc-in, .lcc-ta { width: 100%; font: inherit; font-size: 13px; color: var(--lcc-fg); background: var(--lcc-bg2); border: 1px solid var(--lcc-line); border-radius: 9px; padding: 9px 10px; }
+.lcc-ta { min-height: 62px; resize: vertical; }
+.lcc-in:focus, .lcc-ta:focus, .lcc-select:focus { outline: 2px solid var(--lcc-accent); outline-offset: 1px; }
+.lcc-two { display: flex; gap: 10px; } .lcc-two .lcc-field { flex: 1; }
+
+.lcc-yn { display: flex; align-items: center; gap: 8px; margin-bottom: 11px; flex-wrap: wrap; }
+.lcc-yn > span { flex: 1 1 100%; font-size: 13px; }
+.lcc-chip { font: inherit; font-size: 12.5px; cursor: pointer; padding: 5px 14px; border-radius: 99px; border: 1px solid var(--lcc-line); background: var(--lcc-bg2); color: var(--lcc-fg); }
+.lcc-chip.on { background: var(--lcc-accent2); border-color: var(--lcc-accent2); color: #fff; }
+
+/* ---- score ---- */
+.lcc-bigscore { font-size: 40px; font-weight: 800; margin-bottom: 6px; }
+.lcc-bigscore span { font-size: 15px; font-weight: 500; color: var(--lcc-soft); }
+.lcc-score-list { margin-top: 10px; display: flex; flex-direction: column; gap: 9px; }
+.lcc-score-row { border: 1px solid var(--lcc-line); border-radius: 10px; padding: 9px 11px; background: var(--lcc-bg2); }
+.lcc-score-row.na { opacity: .7; }
+.lcc-score-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lcc-score-label { font-weight: 600; font-size: 12.5px; }
+.lcc-score-pts { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+.lcc-score-basis { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding: 2px 6px; border-radius: 6px; background: var(--lcc-bg); color: var(--lcc-soft); border: 1px solid var(--lcc-line); }
+.lcc-score-basis.observed { color: var(--lcc-ok); } .lcc-score-basis.selfreported { color: var(--lcc-wait); } .lcc-score-basis.mixed { color: #a9d8ff; } .lcc-score-basis.notassessed { color: var(--lcc-soft); }
+.lcc-score-detail { font-size: 11.5px; color: var(--lcc-soft); margin-top: 5px; line-height: 1.5; }
+
+@media (prefers-reduced-motion: reduce) { .lcc-modal-overlay { backdrop-filter: none; } }

@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "LeetCode Independent-Solving Coach",
+  "version": "0.1.0",
+  "description": "Coaches independent LeetCode practice: focus sessions, process analytics, honest self-assessment, and a transparent score. Local-only, no backend.",
+  "permissions": ["storage", "alarms", "notifications"],
+  "host_permissions": ["*://leetcode.com/*", "*://*.leetcode.com/*"],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "LeetCode Coach",
+    "default_icon": {
+      "16": "src/icons/icon16.png",
+      "48": "src/icons/icon48.png",
+      "128": "src/icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "src/icons/icon16.png",
+    "48": "src/icons/icon48.png",
+    "128": "src/icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://leetcode.com/problems/*"],
+      "js": ["src/content/inject.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["*://leetcode.com/problems/*"],
+      "js": [
+        "src/lib/util.js",
+        "src/lib/schema.js",
+        "src/lib/storage.js",
+        "src/lib/scoring.js",
+        "src/content/content.js"
+      ],
+      "css": ["src/content/overlay.css"],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    }
+  ]
+}
