@@ -62,6 +62,11 @@
     /** Append a finished session (most-recent-first). */
     addSession: function (session) {
       return storage.getSessions().then(function (list) {
+        // Idempotent: never store the same session id twice (guards against a
+        // double END_SESSION from overlapping overlay/popup actions).
+        if (session && session.id && list.some(function (s) { return s.id === session.id; })) {
+          return session;
+        }
         list.unshift(session);
         return set(K.sessions, list).then(function () { return session; });
       });

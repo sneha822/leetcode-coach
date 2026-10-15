@@ -27,14 +27,17 @@
       <section id="tiles" class="tiles"></section>
 
       <section class="panel">
-        <h2>Weekly activity <span class="hint">sessions per week, last 8 weeks (green = accepted)</span></h2>
-        <div id="chartWeekly" class="chart"></div>
+        <div class="panel-head">
+          <h2>Activity <span class="hint">sessions per day, last 12 weeks</span></h2>
+          <span id="streak" class="streak"></span>
+        </div>
+        <div id="heatmap" class="heatmap"></div>
       </section>
 
       <div class="cols">
         <section class="panel">
           <h2>Independent vs assisted</h2>
-          <div id="indVsAssist"></div>
+          <div id="donut" class="donut-wrap"></div>
           <p class="fine">Assisted = hints/editorial mode, self-reported external help, or a paste you marked as external.</p>
         </section>
         <section class="panel">
@@ -60,7 +63,7 @@
           <div id="needHelp"></div>
         </section>
         <section class="panel">
-          <h2>Re-attempted problems <span class="hint">solved more than once</span></h2>
+          <h2>Re-attempted problems <span class="hint">more than one session</span></h2>
           <div id="repeats"></div>
         </section>
       </div>
@@ -71,7 +74,9 @@
       </section>
 
       <section class="panel">
-        <h2>Session log</h2>
+        <div class="panel-head">
+          <h2>Problem log <span class="hint">grouped by problem — click to expand attempts</span></h2>
+        </div>
         <div id="log" class="log"></div>
       </section>
     </div>
