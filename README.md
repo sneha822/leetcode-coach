@@ -84,7 +84,10 @@ No build step, no backend, no npm install. (Icons were generated with
 3. Code. The overlay shows a timer, approximate edit activity, paste count, and
    submission count. If you paste a large block you'll get a gentle prompt to
    classify it as *your refactor*, a *template*, or *external help* — only
-   "external help" affects the score.
+   "external help" affects the score. If you step away, the timer **auto-pauses
+   after 5 minutes idle** (configurable in the popup's settings, or off) and
+   resumes the moment you interact again — so a forgotten session won't clock
+   idle time, and it's frozen entirely if the tab is closed.
 4. Click **End** → a **reflection** asks whether you solved it without hints,
    used external help, can reproduce it, can explain it, plus edge cases and a
    short explanation.

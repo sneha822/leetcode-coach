@@ -47,7 +47,7 @@
       view.appendChild(el("div", { class: "title", text: a.title || U.titleFromSlug(a.slug) }));
       view.appendChild(el("div", { class: "row" }, [
         el("span", { class: "badge", text: (S.MODES.find(function (m) { return m.id === a.mode; }) || {}).label || a.mode }),
-        el("span", { class: "status", text: a.paused ? "Paused" : "Recording" })
+        el("span", { class: "status", text: a.paused ? (a.pausedReason === "idle" ? "Auto-paused (idle)" : "Paused") : "Recording" })
       ]));
       var timer = el("div", { class: "timer", text: U.fmtDuration(liveMs(a)) });
       view.appendChild(timer);
@@ -107,6 +107,7 @@
     document.getElementById("setReminders").checked = !!st.settings.remindersEnabled;
     document.getElementById("setOverlay").checked = !!st.settings.showOverlay;
     document.getElementById("setRawCode").checked = !!st.settings.storeRawCode;
+    document.getElementById("setAutoPause").value = String(st.settings.autoPauseMins != null ? st.settings.autoPauseMins : 5);
   }
   function bindSetting(id, key) {
     document.getElementById(id).addEventListener("change", function (e) {
@@ -114,6 +115,9 @@
       bg("SET_SETTINGS", { patch: patch }).then(function (s) { st.settings = s; toTab({ type: "POPUP_REFRESH" }); });
     });
   }
+  document.getElementById("setAutoPause").addEventListener("change", function (e) {
+    bg("SET_SETTINGS", { patch: { autoPauseMins: parseInt(e.target.value, 10) || 0 } }).then(function (s) { st.settings = s; toTab({ type: "POPUP_REFRESH" }); });
+  });
   bindSetting("setReminders", "remindersEnabled");
   bindSetting("setOverlay", "showOverlay");
   bindSetting("setRawCode", "storeRawCode");

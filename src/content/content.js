@@ -124,14 +124,37 @@
       inactivity = null;
       if (activeHere() && !state.active.paused) send("EVENT_INACTIVITY", period);
     }
+    // Coming back from an idle auto-pause resumes automatically (a manual pause does not).
+    if (state.active && state.active.paused && state.active.pausedReason === "idle" && state.active.slug === slug) {
+      send("AUTO_RESUME").then(pullState);
+    }
   }
+  // Analytics: start an inactivity period after a short gap.
   setInterval(function () {
     if (!activeHere() || state.active.paused) return;
     var gap = Date.now() - lastActivityAt;
     if (!inactivity && gap >= S.INACTIVITY_GAP_MS) inactivity = { startTs: lastActivityAt };
   }, 10000);
-  // Mouse/keyboard inside the editor counts as activity (not stored as edits).
-  document.addEventListener("keydown", function (e) { if (e.target && e.target.closest && e.target.closest(".monaco-editor")) markActivity(); }, true);
+  // Idle auto-pause: if you walk away (or forget to stop), pause the timer after
+  // `autoPauseMins` of no activity, freezing at the last activity so idle time
+  // isn't counted. Returning (any interaction) auto-resumes via markActivity().
+  setInterval(function () {
+    if (!activeHere() || state.active.paused) return;
+    var mins = state.settings.autoPauseMins;
+    if (!mins || mins <= 0) return;
+    if (Date.now() - lastActivityAt >= mins * 60000) send("AUTO_PAUSE", { since: lastActivityAt }).then(pullState);
+  }, 15000);
+  // Heartbeat: proves the tab is alive so the background can freeze a forgotten
+  // timer if the tab is closed/crashes/sleeps.
+  setInterval(function () {
+    if (activeHere()) send("HEARTBEAT", { lastActivityAt: lastActivityAt });
+  }, 15000);
+  // What counts as activity: edits, and general interaction on the problem tab.
+  var throttledMark = (function () { var last = 0; return function () { var n = Date.now(); if (n - last > 1000) { last = n; markActivity(); } }; })();
+  ["keydown", "mousedown", "pointerdown", "scroll", "wheel"].forEach(function (ev) {
+    document.addEventListener(ev, throttledMark, true);
+  });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) markActivity(); });
 
   /* ================= OVERLAY ================= */
   var root = null, panel = null, panelHost = null;
@@ -169,7 +192,7 @@
 
     if (state.active && state.active.slug === slug) {
       panel.appendChild(el("div", { class: "lcc-timer", id: "lcc-timer", text: U.fmtDuration(liveMs()) }));
-      panel.appendChild(el("div", { class: "lcc-status", text: state.active.paused ? "Paused" : "Recording your process" }));
+      panel.appendChild(el("div", { class: "lcc-status", text: state.active.paused ? (state.active.pausedReason === "idle" ? "Auto-paused — idle (type to resume)" : "Paused") : "Recording your process" }));
       var m = state.active.metrics || {};
       panel.appendChild(el("div", { class: "lcc-metrics" }, [
         pill("edits", m.editEvents || 0),

@@ -360,7 +360,9 @@
   function boot() { return store.getSessions().then(function (list) { sessions = list || []; render(); }); }
   try {
     chrome.storage.onChanged.addListener(function (changes, area) {
-      if (area === "local" && (changes[S.KEYS.sessions] || changes[S.KEYS.active])) boot();
+      // Only react to finished-session changes; ignore the frequent active-session
+      // heartbeat writes so the dashboard doesn't re-render every 15s.
+      if (area === "local" && changes[S.KEYS.sessions]) boot();
     });
   } catch (e) {}
   boot();

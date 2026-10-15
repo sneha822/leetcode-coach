@@ -20,6 +20,20 @@ function recompute(a) {
   return a;
 }
 
+// If the content script stopped heartbeating (tab closed/crashed/asleep),
+// freeze the timer at the last heartbeat and mark it idle-paused so reopening
+// doesn't silently count all the away-time. Returns true if it changed `a`.
+function maybeStaleFreeze(a) {
+  if (!a || !a.running || a.paused) return false;
+  var last = a.lastTickAt || a.startedAt;
+  if (Date.now() - last <= S.STALE_TICK_MS) return false;
+  a.paused = true;
+  a.pausedReason = "idle";
+  a.pauseStartedAt = last;
+  a.durationMs = Math.max(0, last - a.startedAt - (a.pausedMs || 0));
+  return true;
+}
+
 function withActive(fn, sendResponse) {
   store.getActive().then(function (a) {
     Promise.resolve(fn(a)).then(function (ret) {
@@ -48,7 +62,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
     case "GET_STATE":
       Promise.all([store.getActive(), store.getSettings()]).then(function (r) {
-        sendResponse({ active: recompute(r[0]), settings: r[1] });
+        var a = r[0];
+        if (maybeStaleFreeze(a)) {
+          store.setActive(a).then(function () { sendResponse({ active: a, settings: r[1] }); });
+        } else {
+          sendResponse({ active: recompute(a), settings: r[1] });
+        }
       });
       return true;
 
@@ -71,7 +90,20 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     case "PAUSE":
       withActive(function (a) {
         if (!a) return { resp: { ok: false } };
-        if (!a.paused) { recompute(a); a.paused = true; a.pauseStartedAt = Date.now(); }
+        if (!a.paused) { recompute(a); a.paused = true; a.pauseStartedAt = Date.now(); a.pausedReason = "manual"; }
+        return { active: a };
+      }, sendResponse);
+      return true;
+
+    // Idle auto-pause: freeze at `since` (the last activity), not now, so the
+    // idle gap that triggered it is excluded from the timer.
+    case "AUTO_PAUSE":
+      withActive(function (a) {
+        if (!a || a.paused || a.slug !== msg.slug) return { resp: { ok: true }, __persist: false };
+        var since = msg.since && msg.since <= Date.now() ? msg.since : Date.now();
+        since = Math.max(since, a.startedAt);
+        a.paused = true; a.pausedReason = "idle"; a.pauseStartedAt = since;
+        a.durationMs = Math.max(0, since - a.startedAt - (a.pausedMs || 0));
         return { active: a };
       }, sendResponse);
       return true;
@@ -79,7 +111,28 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     case "RESUME":
       withActive(function (a) {
         if (!a) return { resp: { ok: false } };
-        if (a.paused) { a.pausedMs = (a.pausedMs || 0) + (Date.now() - (a.pauseStartedAt || Date.now())); a.paused = false; a.pauseStartedAt = null; a.lastResumeAt = Date.now(); a._lastEditAt = null; }
+        if (a.paused) { a.pausedMs = (a.pausedMs || 0) + (Date.now() - (a.pauseStartedAt || Date.now())); a.paused = false; a.pausedReason = null; a.pauseStartedAt = null; a.lastResumeAt = Date.now(); a.lastTickAt = Date.now(); a.lastActivityAt = Date.now(); a._lastEditAt = null; }
+        return { active: a };
+      }, sendResponse);
+      return true;
+
+    // Only resumes an IDLE auto-pause (a manual pause stays paused until you resume).
+    case "AUTO_RESUME":
+      withActive(function (a) {
+        if (!a || !a.paused || a.pausedReason !== "idle" || a.slug !== msg.slug) return { resp: { ok: true }, __persist: false };
+        a.pausedMs = (a.pausedMs || 0) + (Date.now() - (a.pauseStartedAt || Date.now()));
+        a.paused = false; a.pausedReason = null; a.pauseStartedAt = null; a.lastResumeAt = Date.now(); a.lastTickAt = Date.now(); a.lastActivityAt = Date.now(); a._lastEditAt = null;
+        return { active: a };
+      }, sendResponse);
+      return true;
+
+    // Heartbeat from the content script: proves the tab is alive and carries the
+    // last activity time used for idle decisions.
+    case "HEARTBEAT":
+      withActive(function (a) {
+        if (!a || a.slug !== msg.slug) return { resp: { ok: true }, __persist: false };
+        a.lastTickAt = Date.now();
+        if (msg.lastActivityAt) a.lastActivityAt = msg.lastActivityAt;
         return { active: a };
       }, sendResponse);
       return true;

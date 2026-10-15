@@ -37,6 +37,9 @@
     INACTIVITY_GAP_MS: 60000,
     // Each edit event credits this much "active coding time" (merged, capped by elapsed).
     ACTIVE_WINDOW_MS: 8000,
+    // If the content script stops sending heartbeats for this long (tab closed,
+    // crashed, or asleep), the background freezes the timer at the last beat.
+    STALE_TICK_MS: 45000,
 
     REMINDER_DAYS: [1, 3, 7, 14],
 
@@ -46,7 +49,8 @@
       storeRawCode: false,        // privacy: off by default. Only diffs/lengths kept.
       remindersEnabled: true,
       showOverlay: true,
-      largePasteChars: 120
+      largePasteChars: 120,
+      autoPauseMins: 5            // auto-pause after this many minutes idle (0 = off)
     },
 
     /** A fresh, empty self-assessment plan (pre-session). */
@@ -88,8 +92,10 @@
         pausedMs: 0,
         running: true,
         paused: false,
+        pausedReason: null,  // 'manual' | 'idle' — idle pauses auto-resume on activity
         lastResumeAt: start,
-        lastActivityAt: null,
+        lastActivityAt: start,
+        lastTickAt: start,   // heartbeat from the content script; stale => tab gone
         firstEditAt: null,
         // self-assessment
         plan: schema.newPlan(),
